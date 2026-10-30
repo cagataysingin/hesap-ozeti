@@ -35,7 +35,7 @@
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         
         /* Chat */
-        .chat-box { height: 220px; border: 1px solid #ddd; border-radius: 10px; overflow-y: scroll; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: #fafafa; }
+        .chat-box { height: 180px; border: 1px solid #ddd; border-radius: 10px; overflow-y: scroll; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: #fafafa; }
         .message { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 14px; word-break: break-word; }
         .message.sent { background: #ffccd5; align-self: flex-end; color: #333; }
         .message.received { background: #e2e2e2; align-self: flex-start; color: #333; }
@@ -43,11 +43,16 @@
         .chat-input-area input { margin-top: 0; text-align: left; }
         .chat-input-area .btn { margin-top: 0; width: 80px; }
 
-        /* Oyun Alanı */
+        /* Oyunlar Ortak Alanı */
         .game-area { text-align: center; padding: 10px 0; }
-        .options-container { display: flex; gap: 10px; margin-top: 15px; }
-        .option-btn { flex: 1; padding: 20px 10px; background: #f0f0f0; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .options-container { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .option-btn { width: 100%; padding: 15px; background: #f0f0f0; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; text-align: left; }
         .option-btn:hover { background: #ffe0e6; border-color: var(--primary); }
+
+        /* Tic-Tac-Toe (XOX) Tahtası */
+        .tictactoe-board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 15px 0; }
+        .ttt-cell { aspect-ratio: 1; background: #f9f9f9; border: 2px solid #ddd; border-radius: 10px; font-size: 32px; font-weight: bold; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--primary); }
+        .ttt-cell:hover { background: #ffe0e6; }
     </style>
 </head>
 <body>
@@ -84,11 +89,13 @@
         
         <div class="menu-grid">
             <button class="btn" onclick="switchTab('chat')">Canlı Chat 💬</button>
-            <button class="btn btn-secondary" onclick="switchTab('game')">Soru Oyunu 🎯</button>
+            <button class="btn btn-secondary" onclick="switchTab('onedio')">Onedio Testi 🧪</button>
+            <button class="btn" style="background:#28a745;" onclick="switchTab('kelime')">Kelime Türet ✍️</button>
+            <button class="btn" style="background:#e67e22;" onclick="switchTab('tictactoe')">XOX Oyunu ❌</button>
         </div>
 
         <!-- CHAT SEKMESİ -->
-        <div id="tab-chat" class="tab-content" style="margin-top: 15px;">
+        <div id="tab-chat" class="tab-content hidden" style="margin-top: 15px;">
             <div class="chat-box" id="chat-box"></div>
             <div class="chat-input-area">
                 <input type="text" id="msg-input" placeholder="Mesaj yaz...">
@@ -96,15 +103,43 @@
             </div>
         </div>
 
-        <!-- OYUN SEKMESİ -->
-        <div id="tab-game" class="tab-content hidden" style="margin-top: 15px;">
-            <h3 id="question-title">Birimiz Seçiyoruz!</h3>
+        <!-- ONEDİO TEST SEKMESİ -->
+        <div id="tab-onedio" class="tab-content" style="margin-top: 15px;">
+            <h3 id="test-title">İlişki Testi 💖</h3>
             <div class="game-area">
-                <p id="question-text" style="font-weight: bold; margin-bottom: 10px;"></p>
-                <div class="options-container">
-                    <button class="option-btn" id="opt1" onclick="makeChoice(0)">Seçenek 1</button>
-                    <button class="option-btn" id="opt2" onclick="makeChoice(1)">Seçenek 2</button>
+                <p id="question-text" style="font-weight: bold; margin-bottom: 15px; font-size: 16px; color:#444;"></p>
+                <div class="options-container" id="test-options"></div>
+            </div>
+        </div>
+
+        <!-- KELİME TÜRETME SEKMESİ -->
+        <div id="tab-kelime" class="tab-content hidden" style="margin-top: 15px;">
+            <h3>Son Heceden Kelime Türet</h3>
+            <div class="game-area">
+                <p id="kelime-info" style="font-size: 14px; margin-bottom: 10px; color:#555;">Mevcut Kelime:</p>
+                <h2 id="current-word" style="color: var(--secondary); background:#f0f0f5; padding:10px; border-radius:8px;">Henüz kelime yok</h2>
+                <input type="text" id="word-input" placeholder="Son heceyle başlayan kelime yaz...">
+                <button class="btn" onclick="sendWord()">Kelimeyi Gönder</button>
+            </div>
+        </div>
+
+        <!-- TİC-TAC-TOE (XOX) SEKMESİ -->
+        <div id="tab-tictactoe" class="tab-content hidden" style="margin-top: 15px;">
+            <h3>XOX Kapışması ❌⭕</h3>
+            <div class="game-area">
+                <p id="ttt-status" style="font-weight: bold; margin-bottom: 10px; color: var(--secondary);">Sıra sende!</p>
+                <div class="tictactoe-board" id="ttt-board">
+                    <div class="ttt-cell" onclick="makeMove(0)"></div>
+                    <div class="ttt-cell" onclick="makeMove(1)"></div>
+                    <div class="ttt-cell" onclick="makeMove(2)"></div>
+                    <div class="ttt-cell" onclick="makeMove(3)"></div>
+                    <div class="ttt-cell" onclick="makeMove(4)"></div>
+                    <div class="ttt-cell" onclick="makeMove(5)"></div>
+                    <div class="ttt-cell" onclick="makeMove(6)"></div>
+                    <div class="ttt-cell" onclick="makeMove(7)"></div>
+                    <div class="ttt-cell" onclick="makeMove(8)"></div>
                 </div>
+                <button class="btn btn-secondary" onclick="resetTTT()">Yeniden Başlat</button>
             </div>
         </div>
     </div>
@@ -142,12 +177,14 @@
 
         // PEERJS BAĞLANTI MANTIĞI
         let peer, conn;
+        let isHost = false;
 
         function createRoom() {
             let roomId = Math.floor(1000 + Math.random() * 9000).toString();
             peer = new Peer('cagatay-zeynep-' + roomId);
             
             peer.on('open', (id) => {
+                isHost = true;
                 document.getElementById('connection-status').innerText = "Oda Kuruldu! Kod: " + roomId + " (Sevgiline söyle)";
             });
 
@@ -178,8 +215,12 @@
             conn.on('data', (data) => {
                 if (data.type === 'chat') {
                     appendMessage(data.msg, 'received');
-                } else if (data.type === 'game') {
-                    alert("Sevgilin bir seçim yaptı! ✨");
+                } else if (data.type === 'kelime') {
+                    updateWordGame(data.word);
+                } else if (data.type === 'ttt') {
+                    receiveMove(data.index, data.playerSymbol);
+                } else if (data.type === 'ttt-reset') {
+                    resetTTTBoardLocally();
                 }
             });
         }
@@ -197,6 +238,7 @@
             if(!msg) return;
             appendMessage(msg, 'sent');
             conn.send({ type: 'chat', msg: msg });
+            input.value = false;
             input.value = '';
         }
 
@@ -209,29 +251,125 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // OYUN SORULARI
-        const questions = [
-            { q: "İlk kim aşık oldu?", opt1: "Ben 😎", opt2: "O 🥰" },
-            { q: "Kim daha çok uyur?", opt1: "Ben 😴", opt2: "O 🐨" },
-            { q: "Film izlerken kim daha çabuk uyuyakalır?", opt1: "Ben 🎬", opt2: "O 🍿" }
+        // ONEDİO TESTLERİ
+        const onedioQuestions = [
+            { q: "Tartıştıktan sonra genelde ilk kim alttan alır? 🥺", options: ["Hemen yumuşayan taraf ben olurum", "Önce biraz trip atılır, sonra barışılır", "Kesinlikle o alttan alır"] },
+            { q: "Dışarıda yemek yiyeceksiniz, mekan seçimi kime kalır? 🍕", options: ["Direkt benim dediğim yere gidilir", "O ne isterse ortak karar verilir", "Sürekli 'ne fark eder' diye birbirimize sorarız"] },
+            { q: "Gelecekte beraber yaşayacağınız evde kesinlikle olmalı dediğiniz şey? 🏡", options: ["Devasa bir oyun/sinema köşesi", "Koca bir kütüphane ve kahve makinesi", "Sonsuz huzur ve konforlu bir yatak"] }
         ];
-        let currentQ = 0;
+        let currentQIndex = 0;
 
-        function loadQuestion() {
-            if(currentQ >= questions.length) currentQ = 0;
-            let q = questions[currentQ];
-            document.getElementById('question-text').innerText = q.q;
-            document.getElementById('opt1').innerText = q.opt1;
-            document.getElementById('opt2').innerText = q.opt2;
+        function loadOnedioTest() {
+            if(currentQIndex >= onedioQuestions.length) {
+                document.getElementById('test-title').innerText = "Test Bitti! 🎉";
+                document.getElementById('question-text').innerText = "Uyumunuz %100! Birbiriniz için yaratılmışsınız mazoşist bir uyum var aranızda! ❤️✨";
+                document.getElementById('test-options').innerHTML = `<button class="btn" onclick="currentQIndex=0; loadOnedioTest();">Testi Baştan Çöz</button>`;
+                return;
+            }
+            let qData = onedioQuestions[currentQIndex];
+            document.getElementById('test-title').innerText = `İlişki Testi (${currentQIndex + 1}/${onedioQuestions.length})`;
+            document.getElementById('question-text').innerText = qData.q;
+            
+            let html = "";
+            qData.options.forEach((opt, idx) => {
+                html += `<button class="option-btn" onclick="nextQuestion()">✨ ${opt}</button>`;
+            });
+            document.getElementById('test-options').innerHTML = html;
         }
 
-        function makeChoice(choiceIdx) {
-            conn.send({ type: 'game', choice: choiceIdx });
-            currentQ++;
-            loadQuestion();
+        function nextQuestion() {
+            currentQIndex++;
+            loadOnedioTest();
+        }
+        setTimeout(loadOnedioTest, 300);
+
+        // KELİME TÜRETME SİSTEMİ
+        let activeWord = "";
+
+        function sendWord() {
+            let input = document.getElementById('word-input');
+            let word = input.value.trim().toLowerCase();
+            if(!word) return;
+
+            if(activeWord && activeWord.length > 0) {
+                let lastTwo = activeWord.slice(-2);
+                if(!word.startsWith(lastTwo)) {
+                    alert(`Kelime "${lastTwo}" hecesiyle başlamalı!`);
+                    return;
+                }
+            }
+
+            activeWord = word;
+            document.getElementById('current-word').innerText = word.toUpperCase();
+            conn.send({ type: 'kelime', word: word });
+            input.value = '';
         }
 
-        loadQuestion();
+        function updateWordGame(word) {
+            activeWord = word;
+            document.getElementById('current-word').innerText = word.toUpperCase();
+        }
+
+        // TİC-TAC-TOE (XOX) OYUNU
+        let tttBoard = ["", "", "", "", "", "", "", "", ""];
+        let myTurn = true; // Oda kuran X başlar, katılan O
+        let mySymbol = isHost ? "X" : "O";
+
+        function makeMove(index) {
+            if(tttBoard[index] !== "" || !myTurn) return;
+            
+            tttBoard[index] = isHost ? "X" : "O";
+            myTurn = false;
+            updateTTTUI();
+            
+            conn.send({ type: 'ttt', index: index, playerSymbol: isHost ? "X" : "O" });
+            checkTTTWinner();
+        }
+
+        function receiveMove(index, symbol) {
+            tttBoard[index] = symbol;
+            myTurn = true;
+            updateTTTUI();
+            checkTTTWinner();
+        }
+
+        function updateTTTUI() {
+            let cells = document.querySelectorAll('.ttt-cell');
+            cells.forEach((cell, idx) => {
+                cell.innerText = tttBoard[idx];
+            });
+            document.getElementById('ttt-status').innerText = myTurn ? "Sıra sende! 🎯" : "Sevgilinin hamlesi bekleniyor... ⏳";
+        }
+
+        function checkTTTWinner() {
+            const wins = [
+                [0,1,2], [3,4,5], [6,7,8],
+                [0,3,6], [1,4,7], [2,5,8],
+                [0,4,8], [2,4,6]
+            ];
+            for(let combo of wins) {
+                let [a,b,c] = combo;
+                if(tttBoard[a] && tttBoard[a] === tttBoard[b] && tttBoard[a] === tttBoard[c]) {
+                    document.getElementById('ttt-status').innerText = `Kazanan: ${tttBoard[a]}! Tebrikler! 🎉`;
+                    myTurn = false;
+                    return;
+                }
+            }
+            if(!tttBoard.includes("")) {
+                document.getElementById('ttt-status').innerText = "Olay berabere bitti! 🤝";
+            }
+        }
+
+        function resetTTT() {
+            resetTTTBoardLocally();
+            conn.send({ type: 'ttt-reset' });
+        }
+
+        function resetTTTBoardLocally() {
+            tttBoard = ["", "", "", "", "", "", "", "", ""];
+            myTurn = isHost ? true : false;
+            updateTTTUI();
+        }
     </script>
 </body>
 </html>
