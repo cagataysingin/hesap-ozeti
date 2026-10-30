@@ -1,992 +1,237 @@
 <!DOCTYPE html>
-<html lang="tr" class="h-full">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Zeynep & Çağatay'ın Sevimli Aşk Dünyası 🧸💕</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
-    <!-- Canvas Confetti -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <!-- PeerJS CDN for WebRTC Realtime Multiplayer -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        pastelBg: '#FFF0F5',
-                        pastelCard: '#FFFFFF',
-                        sweetPink: '#FFB6C1',
-                        hotPink: '#FF69B4',
-                        softRose: '#FF85A2',
-                        mintGreen: '#A8E6CF',
-                        sageGreen: '#D4EDDA',
-                        softText: '#5A4A4E',
-                    },
-                    fontFamily: {
-                        sans: ['Quicksand', 'sans-serif'],
-                        cute: ['Fredoka', 'cursive']
-                    }
-                }
-            }
-        }
-    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bizim Dünyamız</title>
+    <!-- PeerJS için CDN -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
     <style>
-        body {
-            background: linear-gradient(135deg, #FFF0F5 0%, #FFE4E1 50%, #E8F5E9 100%);
-            color: #5A4A4E;
-            touch-action: manipulation;
-            overflow-x: hidden;
+        :root {
+            --primary: #ff6584;
+            --secondary: #6c63ff;
+            --bg-color: #ffe6eb;
+            --card-bg: #ffffff;
+            --text-color: #333333;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: var(--bg-color); color: var(--text-color); display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 15px; }
+        .container { width: 100%; max-width: 450px; background: var(--card-bg); border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); padding: 20px; margin-bottom: 20px; }
+        h1, h2 { text-align: center; color: var(--primary); margin-bottom: 15px; }
+        .btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
+        .btn-secondary { background: var(--secondary); }
+        input { width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 10px; font-size: 16px; margin-top: 10px; text-align: center; outline: none; }
+        input:focus { border-color: var(--primary); }
+        .hidden { display: none !important; }
         
-        /* Floating Cute Items Animation Background */
-        .bg-floating {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 0;
-            overflow: hidden;
-        }
-        .bg-float-item {
-            position: absolute;
-            list-style: none;
-            display: block;
-            font-size: 24px;
-            bottom: -60px;
-            animation: floatUp 14s linear infinite;
-            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.05));
-        }
-        @keyframes floatUp {
-            0% { transform: translateY(0) rotate(0deg) scale(0.8); opacity: 0.9; }
-            50% { transform: translateY(-50vh) rotate(180deg) scale(1.1); }
-            100% { transform: translateY(-110vh) rotate(360deg) scale(0.8); opacity: 0; }
-        }
+        /* Sayaçlar */
+        .timers { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+        .timer-card { background: #fff0f3; padding: 12px; border-radius: 12px; text-align: center; border: 1px dashed var(--primary); }
+        .timer-card h3 { font-size: 14px; color: #555; margin-bottom: 4px; }
+        .timer-card p { font-size: 16px; font-weight: bold; color: var(--primary); }
 
-        .cute-card {
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 2px solid rgba(255, 182, 193, 0.5);
-            box-shadow: 0 10px 30px rgba(255, 182, 193, 0.25);
-        }
-        .pink-btn {
-            background: linear-gradient(135deg, #FFB6C1 0%, #FF69B4 100%);
-            box-shadow: 0 4px 15px rgba(255, 105, 180, 0.3);
-        }
-        .mint-btn {
-            background: linear-gradient(135deg, #A8E6CF 0%, #76D7C4 100%);
-            box-shadow: 0 4px 15px rgba(168, 230, 207, 0.4);
-        }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        /* Sekmeler & Menü */
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         
-        .memory-card {
-            perspective: 1000px;
-        }
-        .memory-card-inner {
-            transition: transform 0.5s;
-            transform-style: preserve-3d;
-        }
-        .memory-card.flipped .memory-card-inner {
-            transform: rotateY(180deg);
-        }
+        /* Chat */
+        .chat-box { height: 220px; border: 1px solid #ddd; border-radius: 10px; overflow-y: scroll; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: #fafafa; }
+        .message { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 14px; word-break: break-word; }
+        .message.sent { background: #ffccd5; align-self: flex-end; color: #333; }
+        .message.received { background: #e2e2e2; align-self: flex-start; color: #333; }
+        .chat-input-area { display: flex; gap: 5px; }
+        .chat-input-area input { margin-top: 0; text-align: left; }
+        .chat-input-area .btn { margin-top: 0; width: 80px; }
+
+        /* Oyun Alanı */
+        .game-area { text-align: center; padding: 10px 0; }
+        .options-container { display: flex; gap: 10px; margin-top: 15px; }
+        .option-btn { flex: 1; padding: 20px 10px; background: #f0f0f0; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .option-btn:hover { background: #ffe0e6; border-color: var(--primary); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans relative selection:bg-hotPink selection:text-white">
+<body>
 
-    <!-- FLOATING CUTE BACKGROUND ELEMENTS -->
-    <ul class="bg-floating">
-        <li class="bg-float-item" style="left: 8%; animation-delay: 0s;">🧸</li>
-        <li class="bg-float-item" style="left: 20%; animation-delay: 3s; font-size: 28px;">💖</li>
-        <li class="bg-float-item" style="left: 35%; animation-delay: 6s;">🌸</li>
-        <li class="bg-float-item" style="left: 50%; animation-delay: 1s; font-size: 32px;">🧸</li>
-        <li class="bg-float-item" style="left: 68%; animation-delay: 8s;">✨</li>
-        <li class="bg-float-item" style="left: 82%; animation-delay: 4s;">💗</li>
-        <li class="bg-float-item" style="left: 92%; animation-delay: 9s;">🎀</li>
-    </ul>
-
-    <!-- HEADER BAR -->
-    <header class="cute-card sticky top-0 z-40 px-4 py-3 rounded-b-3xl border-b-2 border-sweetPink/40">
-        <div class="max-w-5xl mx-auto flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-sweetPink to-mintGreen flex items-center justify-center text-white text-2xl shadow-md animate-bounce">
-                    🧸
-                </div>
-                <div>
-                    <h1 class="text-lg font-black text-softText flex items-center gap-1.5 font-cute">
-                        Zeynep & Çağatay <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-hotPink text-white font-extrabold uppercase">Love Lounge</span>
-                    </h1>
-                    <p id="room-code-display" class="text-[11px] text-hotPink font-bold">Oda: Bağlantı Bekleniyor</p>
-                </div>
+    <!-- GİRİŞ EKRANI -->
+    <div class="container" id="login-screen">
+        <h1>Bizim Dünyamız 💖</h1>
+        
+        <!-- SAYAÇLAR -->
+        <div class="timers">
+            <div class="timer-card">
+                <h3>Sevgililik Süremiz 🥰</h3>
+                <p id="relationship-timer">Yükleniyor...</p>
             </div>
-
-            <!-- Connection Status -->
-            <div id="connection-pill" class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-100 border border-red-300 text-red-500 text-xs font-extrabold">
-                <span id="conn-dot" class="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse"></span>
-                <span id="conn-text">Çevrimdışı</span>
+            <div class="timer-card">
+                <h3>Zeynep'in Doğum Gününe Kalan 🎂</h3>
+                <p id="zeynep-timer">Yükleniyor...</p>
+            </div>
+            <div class="timer-card">
+                <h3>Çağatay'ın Doğum Gününe Kalan 🎉</h3>
+                <p id="cagatay-timer">Yükleniyor...</p>
             </div>
         </div>
-    </header>
 
-    <!-- SAYAÇLAR VE ZAMAN KÖŞESİ (ÖZEL GÜNLERİMİZ) -->
-    <section class="max-w-5xl mx-auto w-full px-4 pt-4 z-20 relative">
-        <div class="cute-card p-4 sm:p-5 rounded-3xl border-2 border-sweetPink shadow-md">
-            <h3 class="text-sm font-black text-hotPink font-cute text-center mb-3 flex items-center justify-center gap-2">
-                <span>🗓️</span> Özel Günlerimiz & Zaman Sayacı <span>✨</span>
-            </h3>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <!-- Sevgili Olma Sayacı -->
-                <div class="p-3.5 bg-gradient-to-br from-white to-sweetPink/30 rounded-2xl border border-sweetPink text-center shadow-sm">
-                    <span class="text-[11px] font-black uppercase text-hotPink block mb-1">💖 Birlikte Geçen Süremiz</span>
-                    <span class="text-[10px] text-gray-500 font-bold block mb-1">25 Ekim 2025'ten Beri</span>
-                    <div id="counter-love" class="text-xs sm:text-sm font-black text-softText font-cute">
-                        Yükleniyor...
-                    </div>
-                </div>
+        <button class="btn" onclick="createRoom()">Oda Kur 🔑</button>
+        <input type="text" id="room-input" placeholder="4 Haneli Oda Kodu">
+        <button class="btn btn-secondary" onclick="joinRoom()">Odaya Katıl 🚀</button>
+        <p id="connection-status" style="text-align: center; margin-top: 10px; font-size: 14px; color: #666;"></p>
+    </div>
 
-                <!-- Zeynep Doğum Günü Sayacı -->
-                <div class="p-3.5 bg-gradient-to-br from-white to-sweetPink/20 rounded-2xl border border-sweetPink text-center shadow-sm">
-                    <span class="text-[11px] font-black uppercase text-hotPink block mb-1">👑 Zeynep'in Doğum Günü</span>
-                    <span class="text-[10px] text-gray-500 font-bold block mb-1">7 Ocak</span>
-                    <div id="counter-zeynep" class="text-xs sm:text-sm font-black text-softText font-cute">
-                        Yükleniyor...
-                    </div>
-                </div>
+    <!-- OYUN VE CHAT ANA PANELİ -->
+    <div class="container hidden" id="main-screen">
+        <h2 id="room-info">Oda Bağlandı ✨</h2>
+        
+        <div class="menu-grid">
+            <button class="btn" onclick="switchTab('chat')">Canlı Chat 💬</button>
+            <button class="btn btn-secondary" onclick="switchTab('game')">Soru Oyunu 🎯</button>
+        </div>
 
-                <!-- Çağatay Doğum Günü Sayacı -->
-                <div class="p-3.5 bg-gradient-to-br from-white to-mintGreen/30 rounded-2xl border border-mintGreen text-center shadow-sm">
-                    <span class="text-[11px] font-black uppercase text-emerald-700 block mb-1">🧸 Çağatay'ın Doğum Günü</span>
-                    <span class="text-[10px] text-gray-500 font-bold block mb-1">1 Eylül</span>
-                    <div id="counter-cagatay" class="text-xs sm:text-sm font-black text-softText font-cute">
-                        Yükleniyor...
-                    </div>
-                </div>
+        <!-- CHAT SEKMESİ -->
+        <div id="tab-chat" class="tab-content" style="margin-top: 15px;">
+            <div class="chat-box" id="chat-box"></div>
+            <div class="chat-input-area">
+                <input type="text" id="msg-input" placeholder="Mesaj yaz...">
+                <button class="btn" onclick="sendMessage()">Gönder</button>
             </div>
         </div>
-    </section>
 
-    <!-- ODA KUR / KATIL LOBİ EKRANI -->
-    <div id="screen-lobby" class="flex-grow flex items-center justify-center p-4 relative z-10">
-        <div class="cute-card w-full max-w-md p-6 sm:p-8 rounded-3xl text-center space-y-6 relative overflow-hidden border-2 border-sweetPink">
-            <div class="w-20 h-20 bg-sweetPink/30 text-hotPink rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner border border-sweetPink/50 animate-pulse">
-                🧸
-            </div>
-
-            <div>
-                <h2 class="text-2xl font-black text-softText font-cute mb-1">Aşk Dünyamıza Hoş Geldiniz! 🌸</h2>
-                <p class="text-xs text-gray-600 font-medium">İki ayrı telefondan canlı oynamak için oda kurun veya sevgilinizin oda kodunu girin.</p>
-            </div>
-
-            <div class="space-y-4">
-                <div class="grid grid-cols-2 gap-3 text-left">
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-wider text-hotPink mb-1">1. Oyuncu</label>
-                        <input type="text" id="input-player-name" value="Zeynep" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-sweetPink/50 text-softText font-bold text-sm focus:border-hotPink focus:outline-none shadow-sm">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] font-black uppercase tracking-wider text-emerald-600 mb-1">2. Oyuncu</label>
-                        <input type="text" id="input-partner-name" value="Çağatay" class="w-full px-3.5 py-2.5 rounded-2xl bg-white border-2 border-mintGreen text-softText font-bold text-sm focus:border-emerald-400 focus:outline-none shadow-sm">
-                    </div>
+        <!-- OYUN SEKMESİ -->
+        <div id="tab-game" class="tab-content hidden" style="margin-top: 15px;">
+            <h3 id="question-title">Birimiz Seçiyoruz!</h3>
+            <div class="game-area">
+                <p id="question-text" style="font-weight: bold; margin-bottom: 10px;"></p>
+                <div class="options-container">
+                    <button class="option-btn" id="opt1" onclick="makeChoice(0)">Seçenek 1</button>
+                    <button class="option-btn" id="opt2" onclick="makeChoice(1)">Seçenek 2</button>
                 </div>
-
-                <div class="grid grid-cols-2 gap-3 pt-2">
-                    <button onclick="hostCreateRoom()" class="pink-btn py-3.5 text-white font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-plus"></i> Oda Kur
-                    </button>
-                    <button onclick="showJoinInput()" class="mint-btn py-3.5 text-softText font-extrabold rounded-2xl text-xs uppercase tracking-wider transition-all active:scale-95 flex items-center justify-center gap-2">
-                        <i class="fa-solid fa-right-to-bracket"></i> Odaya Katıl
-                    </button>
-                </div>
-
-                <div id="join-code-box" class="hidden space-y-3 pt-3 border-t border-sweetPink/30">
-                    <input type="text" id="input-room-code" placeholder="4 Haneli Oda Kodu" class="w-full px-4 py-3 rounded-2xl bg-white border-2 border-mintGreen text-center text-2xl font-black tracking-widest text-emerald-700 focus:outline-none uppercase shadow-inner">
-                    <button onclick="joinExistingRoom()" class="mint-btn w-full py-3.5 text-softText font-black rounded-2xl text-xs uppercase tracking-wider">
-                        Sevgiline Bağlan 🚀
-                    </button>
-                </div>
-            </div>
-
-            <div id="lobby-waiting-status" class="hidden p-4 rounded-2xl bg-sweetPink/20 border border-sweetPink text-hotPink text-xs font-bold animate-pulse">
-                Oda Kodu: <strong id="generated-code" class="text-2xl font-black text-softText ml-1">---</strong>
-                <p class="text-[10px] text-gray-600 font-normal mt-1">Bu kodu sevgiline söyle, diğer telefondan bağlansın!</p>
             </div>
         </div>
     </div>
 
-    <!-- MAIN GAME HUB -->
-    <div id="screen-main" class="hidden flex-col flex-grow relative z-10">
-
-        <!-- NAV TABS -->
-        <nav class="flex overflow-x-auto no-scrollbar gap-2 p-3 max-w-5xl mx-auto w-full">
-            <button onclick="switchGame('omumu')" id="tab-omumu" class="game-tab py-2.5 px-4 rounded-2xl pink-btn text-white text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all shadow-md">
-                🍿 O Mu Bu Mu?
-            </button>
-            <button onclick="switchGame('tarot')" id="tab-tarot" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                🔮 Aşk Falı
-            </button>
-            <button onclick="switchGame('auction')" id="tab-auction" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                💎 Açık Artırma
-            </button>
-            <button onclick="switchGame('memory')" id="tab-memory" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                🧩 Hafıza Kartları
-            </button>
-
-            <button onclick="switchGame('password')" id="tab-password" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                💬 Kelime Tahmin
-            </button>
-            <button onclick="switchGame('quiz')" id="tab-quiz" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                🧠 Zor Quiz
-            </button>
-            <button onclick="switchGame('wheel')" id="tab-wheel" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                🎡 Aşk Çarkı
-            </button>
-            <button onclick="switchGame('dots')" id="tab-dots" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                📦 Nokta Kutulama
-            </button>
-            <button onclick="switchGame('ttt')" id="tab-ttt" class="game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all">
-                ❌ Canlı SOS
-            </button>
-        </nav>
-
-        <!-- GAME PANELS -->
-        <main class="max-w-5xl w-full mx-auto p-4 flex-grow flex flex-col justify-center">
-
-            <!-- 1. O MU BU MU? -->
-            <section id="game-omumu" class="game-panel flex flex-col items-center">
-                <div class="cute-card w-full max-w-2xl p-6 sm:p-8 rounded-3xl relative overflow-hidden border-2 border-sweetPink">
-                    <div class="flex justify-between items-center mb-6">
-                        <span id="omumu-category" class="px-3 py-1 rounded-full bg-sweetPink/30 text-hotPink text-xs font-black uppercase tracking-wider">🍿 Film & Dizi</span>
-                        <span id="omumu-progress" class="text-xs font-bold text-emerald-600">Soru 1 / 10</span>
-                    </div>
-
-                    <h3 class="text-xl font-black text-center text-softText font-cute mb-6">Hangisini Tercih Edersiniz?</h3>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <button onclick="sendOmumuChoice('A')" id="btn-omumu-a" class="p-6 bg-white hover:bg-sweetPink/20 border-2 border-sweetPink rounded-3xl transition-all flex flex-col items-center justify-center gap-3 text-center active:scale-95 shadow-md">
-                            <span id="icon-omumu-a" class="text-5xl">🎬</span>
-                            <span id="text-omumu-a" class="text-lg font-bold text-softText">Seçenek A</span>
-                        </button>
-
-                        <button onclick="sendOmumuChoice('B')" id="btn-omumu-b" class="p-6 bg-white hover:bg-mintGreen/30 border-2 border-mintGreen rounded-3xl transition-all flex flex-col items-center justify-center gap-3 text-center active:scale-95 shadow-md">
-                            <span id="icon-omumu-b" class="text-5xl">🍿</span>
-                            <span id="text-omumu-b" class="text-lg font-bold text-softText">Seçenek B</span>
-                        </button>
-                    </div>
-
-                    <div id="omumu-match-result" class="hidden p-4 rounded-2xl bg-gradient-to-r from-sweetPink/40 to-mintGreen/40 border border-hotPink/30 text-center animate-bounce mb-4">
-                        <p id="omumu-match-text" class="text-lg font-black text-softText font-cute"></p>
-                    </div>
-
-                    <div class="flex justify-between items-center text-xs font-bold text-gray-500 pt-4 border-t border-sweetPink/30">
-                        <span id="omumu-p1-status" class="text-hotPink">Zeynep: Bekleniyor...</span>
-                        <span id="omumu-p2-status" class="text-emerald-600">Çağatay: Bekleniyor...</span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 2. AŞK FALI & GELECEK KARTLARI (YENİ) -->
-            <section id="game-tarot" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 sm:p-8 rounded-3xl max-w-2xl w-full text-center border-2 border-sweetPink">
-                    <span class="px-3.5 py-1 rounded-full bg-sweetPink/30 text-hotPink text-xs font-black uppercase">🔮 Günlük Aşk Falı</span>
-                    <h3 class="text-xl font-black text-softText font-cute my-3">İkiniz İçin Bir Aşk Kartı Seçin ✨</h3>
-                    <p class="text-xs text-gray-500 mb-6">Kartın üzerine dokunun, sevgilinizle bugünkü aşk enerjinizi keşfedin!</p>
-
-                    <div class="grid grid-cols-3 gap-4 mb-6">
-                        <button onclick="drawTarotCard(1)" class="p-5 bg-gradient-to-b from-white to-sweetPink/30 border-2 border-sweetPink rounded-3xl shadow-md hover:scale-105 transition-all text-4xl">🎴</button>
-                        <button onclick="drawTarotCard(2)" class="p-5 bg-gradient-to-b from-white to-sweetPink/30 border-2 border-sweetPink rounded-3xl shadow-md hover:scale-105 transition-all text-4xl">🃏</button>
-                        <button onclick="drawTarotCard(3)" class="p-5 bg-gradient-to-b from-white to-sweetPink/30 border-2 border-sweetPink rounded-3xl shadow-md hover:scale-105 transition-all text-4xl">🎴</button>
-                    </div>
-
-                    <div id="tarot-result-box" class="hidden p-5 rounded-2xl bg-white border-2 border-sweetPink text-center animate-fade-in shadow-inner">
-                        <span id="tarot-icon" class="text-5xl block mb-2">💗</span>
-                        <h4 id="tarot-title" class="text-lg font-black text-hotPink font-cute">Aşk Kartı</h4>
-                        <p id="tarot-desc" class="text-xs text-gray-600 mt-2 font-medium leading-relaxed"></p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 3. HAFIZA KARTLARI (YENİ) -->
-            <section id="game-memory" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 rounded-3xl max-w-md w-full text-center border-2 border-mintGreen">
-                    <h3 class="text-xl font-black text-softText font-cute mb-1">Sevimli Hafıza Kartları 🧩</h3>
-                    <p class="text-xs text-gray-500 mb-4">Kartları çevirin, eşleşen çiftleri bulun!</p>
-
-                    <div id="memory-grid" class="grid grid-cols-4 gap-2 mb-4">
-                        <!-- Generated Dynamically -->
-                    </div>
-
-                    <div class="flex justify-between text-xs font-bold text-softText pt-2 border-t border-sweetPink/30">
-                        <span>Eşleşen: <strong id="memory-score" class="text-hotPink">0 / 6</strong></span>
-                        <button onclick="resetMemoryGame()" class="text-emerald-600 underline">Yeniden Başlat 🔄</button>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 4. KELİME TAHMİN / PAROLA (YENİ) -->
-            <section id="game-password" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 rounded-3xl max-w-md w-full text-center border-2 border-sweetPink">
-                    <span class="px-3 py-1 rounded-full bg-mintGreen/40 text-emerald-700 text-xs font-black uppercase">💬 Canlı Kelime İpucu</span>
-                    <h3 class="text-xl font-black text-softText font-cute my-2">Aşk Parolası</h3>
-                    <p class="text-xs text-gray-500 mb-4">Biriniz kelimeyi bilir, tek kelimelik ipucu gönderir!</p>
-
-                    <div class="p-4 bg-white rounded-2xl border-2 border-sweetPink mb-4 shadow-inner">
-                        <span class="text-[10px] text-gray-400 font-bold uppercase block">Gizli Kelime</span>
-                        <h4 id="password-secret-word" class="text-2xl font-black text-hotPink tracking-wider">KAHVE ☕</h4>
-                    </div>
-
-                    <div class="space-y-3">
-                        <input type="text" id="input-password-clue" placeholder="Tek kelimelik ipucu yaz..." class="w-full px-4 py-2.5 rounded-2xl bg-white border-2 border-sweetPink text-xs text-softText font-bold focus:outline-none">
-                        <button onclick="sendPasswordClue()" class="pink-btn w-full py-3 text-white font-black rounded-2xl text-xs uppercase tracking-wider">
-                            İpucunu Sevgiline Gönder 📩
-                        </button>
-                    </div>
-
-                    <div id="password-received-clue" class="hidden mt-4 p-3 bg-mintGreen/30 border border-mintGreen rounded-2xl text-emerald-800 text-xs font-bold">
-                        Gelen İpucu: <strong id="text-received-clue" class="text-sm font-black text-softText">---</strong>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 5. AÇIK ARTIRMA -->
-            <section id="game-auction" class="game-panel hidden">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto w-full">
-                    <!-- Zeynep Info -->
-                    <div class="cute-card p-5 rounded-3xl border-2 border-sweetPink flex flex-col justify-between">
-                        <div>
-                            <span class="text-xs font-black text-hotPink uppercase">1. Oyuncu</span>
-                            <h4 id="auc-p1-name" class="text-xl font-black text-softText font-cute">Zeynep</h4>
-                            <div class="my-3 p-3 bg-sweetPink/20 rounded-2xl border border-sweetPink">
-                                <span class="text-[10px] text-gray-500 block uppercase font-bold">Kalan Bütçe</span>
-                                <span id="auc-p1-budget" class="text-2xl font-black text-hotPink">20 TL</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Auction Center -->
-                    <div class="cute-card p-6 rounded-3xl text-center flex flex-col justify-between border-2 border-mintGreen">
-                        <div>
-                            <span class="px-3 py-1 bg-mintGreen/40 text-emerald-700 text-[10px] font-black rounded-full uppercase">Aşk Müzayedesi</span>
-                            
-                            <div class="my-4 p-4 bg-white rounded-2xl border border-sweetPink shadow-sm">
-                                <span id="auc-item-icon" class="text-4xl block mb-2">☕</span>
-                                <h3 id="auc-item-title" class="text-lg font-black text-softText font-cute">Yatakta Kahvaltı Servisi</h3>
-                                <p id="auc-item-desc" class="text-xs text-gray-500 mt-1">Kaybeden taraf nefis bir kahvaltı hazırlar!</p>
-                            </div>
-
-                            <div class="inline-block px-5 py-2 bg-mintGreen text-softText rounded-2xl font-black text-lg shadow-sm mb-2">
-                                Teklif: <span id="auc-current-bid">0 TL</span>
-                            </div>
-                            <p id="auc-highest-bidder" class="text-xs text-emerald-600 font-bold">Teklif bekleniyor</p>
-                        </div>
-
-                        <div class="space-y-2 mt-4">
-                            <div class="grid grid-cols-3 gap-2">
-                                <button onclick="sendBid(1)" class="py-2.5 bg-white hover:bg-sweetPink/20 text-softText font-black rounded-xl text-xs border border-sweetPink">+1 TL</button>
-                                <button onclick="sendBid(2)" class="py-2.5 bg-white hover:bg-sweetPink/20 text-softText font-black rounded-xl text-xs border border-sweetPink">+2 TL</button>
-                                <button onclick="sendBid(5)" class="py-2.5 bg-white hover:bg-sweetPink/20 text-softText font-black rounded-xl text-xs border border-sweetPink">+5 TL</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Çağatay Info -->
-                    <div class="cute-card p-5 rounded-3xl border-2 border-mintGreen flex flex-col justify-between">
-                        <div>
-                            <span class="text-xs font-black text-emerald-600 uppercase">2. Oyuncu</span>
-                            <h4 id="auc-p2-name" class="text-xl font-black text-softText font-cute">Çağatay</h4>
-                            <div class="my-3 p-3 bg-mintGreen/30 rounded-2xl border border-mintGreen">
-                                <span class="text-[10px] text-gray-500 block uppercase font-bold">Kalan Bütçe</span>
-                                <span id="auc-p2-budget" class="text-2xl font-black text-emerald-700">20 TL</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 6. ZOR QUIZ -->
-            <section id="game-quiz" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 sm:p-8 rounded-3xl max-w-2xl w-full border-2 border-sweetPink">
-                    <div class="flex justify-between items-center mb-4">
-                        <span class="text-xs font-black uppercase tracking-wider text-emerald-600">🧠 Zor Quiz</span>
-                        <span id="quiz-num" class="text-xs font-bold text-hotPink">Soru 1 / 5</span>
-                    </div>
-
-                    <h3 id="quiz-q-text" class="text-lg font-black text-softText font-cute mb-6">Soru Yükleniyor...</h3>
-
-                    <div id="quiz-options-container" class="grid grid-cols-1 gap-3 mb-6"></div>
-
-                    <div class="flex justify-between items-center text-xs font-bold pt-4 border-t border-sweetPink/30">
-                        <span class="text-hotPink">Zeynep: <strong id="quiz-p1-score">0 Puan</strong></span>
-                        <span class="text-emerald-600">Çağatay: <strong id="quiz-p2-score">0 Puan</strong></span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 7. CANLI ÇARK -->
-            <section id="game-wheel" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 rounded-3xl max-w-md w-full text-center border-2 border-mintGreen">
-                    <h3 class="text-xl font-black text-softText font-cute mb-1">Aşk & Randevu Çarkı 🎡</h3>
-                    <p class="text-xs text-gray-500 mb-4">Çark iki telefonda da canlı döner!</p>
-
-                    <div class="relative mx-auto w-[260px] h-[260px] mb-6">
-                        <div class="absolute -top-3 left-1/2 -translate-x-1/2 z-20 text-hotPink text-4xl">
-                            <i class="fa-solid fa-caret-down"></i>
-                        </div>
-                        <canvas id="canvas-wheel" width="260" height="260" class="rounded-full shadow-lg border-4 border-white"></canvas>
-                    </div>
-
-                    <button onclick="triggerWheelSpin()" class="pink-btn w-full py-3.5 text-white font-black rounded-2xl text-xs uppercase tracking-wider shadow-md">
-                        Çarkı Çevir! 🎡
-                    </button>
-                </div>
-            </section>
-
-            <!-- 8. NOKTA KUTULAMA -->
-            <section id="game-dots" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 rounded-3xl max-w-md w-full text-center border-2 border-sweetPink">
-                    <h3 class="text-xl font-black text-softText font-cute mb-1">Nokta Kutulama 📦</h3>
-                    <p id="dots-turn-text" class="text-xs text-hotPink font-bold mb-4">Sıra Zeynep'te</p>
-
-                    <div id="dots-grid" class="flex flex-col items-center justify-center p-4 bg-white rounded-2xl border border-sweetPink/40 mb-4 mx-auto"></div>
-
-                    <div class="flex justify-between items-center text-xs font-bold pt-2 border-t border-sweetPink/30">
-                        <span class="text-hotPink">Zeynep: <span id="dots-score-p1">0</span></span>
-                        <span class="text-emerald-600">Çağatay: <span id="dots-score-p2">0</span></span>
-                    </div>
-                </div>
-            </section>
-
-            <!-- 9. CANLI SOS -->
-            <section id="game-ttt" class="game-panel hidden flex flex-col items-center">
-                <div class="cute-card p-6 rounded-3xl max-w-md w-full text-center border-2 border-mintGreen">
-                    <h3 class="text-xl font-black text-softText font-cute mb-1">Aşk SOS ❌⭕</h3>
-                    <p id="ttt-turn-text" class="text-xs text-hotPink font-bold mb-4">Sıra Sende (💖)</p>
-
-                    <div class="grid grid-cols-3 gap-3 w-64 h-64 mx-auto mb-6">
-                        <button onclick="sendTTTMove(0)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(1)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(2)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(3)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(4)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(5)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(6)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(7)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                        <button onclick="sendTTTMove(8)" class="ttt-b bg-white border-2 border-sweetPink rounded-2xl text-3xl font-black flex items-center justify-center hover:bg-sweetPink/10 transition-colors shadow-sm"></button>
-                    </div>
-
-                    <button onclick="resetTTTGame()" class="py-2.5 px-6 bg-white hover:bg-sweetPink/20 text-softText border border-sweetPink font-bold rounded-2xl text-xs">Yeniden Başlat 🔄</button>
-                </div>
-            </section>
-
-        </main>
-
-        <!-- FLOATING CUTE REACTION BAR -->
-        <div class="cute-card sticky bottom-0 z-40 border-t-2 border-sweetPink/40 px-4 py-3 rounded-t-3xl">
-            <div class="max-w-5xl mx-auto flex items-center gap-2">
-                <button onclick="sendEmoji('🧸')" class="w-10 h-10 rounded-2xl bg-white hover:bg-sweetPink/20 flex items-center justify-center text-xl shadow-sm active:scale-90">🧸</button>
-                <button onclick="sendEmoji('💖')" class="w-10 h-10 rounded-2xl bg-white hover:bg-sweetPink/20 flex items-center justify-center text-xl shadow-sm active:scale-90">💖</button>
-                <button onclick="sendEmoji('😘')" class="w-10 h-10 rounded-2xl bg-white hover:bg-sweetPink/20 flex items-center justify-center text-xl shadow-sm active:scale-90">😘</button>
-                <button onclick="sendEmoji('🌸')" class="w-10 h-10 rounded-2xl bg-white hover:bg-sweetPink/20 flex items-center justify-center text-xl shadow-sm active:scale-90">🌸</button>
-                
-                <input type="text" id="chat-input" placeholder="Sevgiline hızlı tepki at..." onkeypress="if(event.key==='Enter') sendChatMessage()" class="flex-grow px-4 py-2.5 rounded-2xl bg-white border-2 border-sweetPink text-xs text-softText font-bold focus:outline-none focus:border-hotPink shadow-inner">
-                <button onclick="sendChatMessage()" class="w-10 h-10 rounded-2xl pink-btn text-white flex items-center justify-center font-bold shadow-md">
-                    <i class="fa-solid fa-paper-plane text-xs"></i>
-                </button>
-
-                <button onclick="toggleChatWindow()" class="relative w-10 h-10 rounded-2xl bg-mintGreen text-softText flex items-center justify-center font-bold shadow-md active:scale-90 ml-1">
-                    <i class="fa-solid fa-comments text-base"></i>
-                    <span id="unread-badge" class="hidden absolute -top-1 -right-1 w-5 h-5 bg-hotPink text-white text-[10px] font-black rounded-full flex items-center justify-center shadow">0</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- POPUP CANLI CHAT PENCERESİ -->
-    <div id="chat-window" class="hidden fixed bottom-20 right-4 w-80 sm:w-96 max-h-[450px] cute-card rounded-3xl border-2 border-hotPink z-50 flex flex-col shadow-2xl overflow-hidden">
-        <div class="px-4 py-3 bg-gradient-to-r from-sweetPink to-mintGreen flex items-center justify-between border-b border-sweetPink">
-            <h4 class="text-xs font-black text-softText font-cute flex items-center gap-1.5">
-                💬 Zeynep & Çağatay Sohbet
-            </h4>
-            <button onclick="toggleChatWindow()" class="text-softText hover:text-hotPink text-sm font-bold">
-                <i class="fa-solid fa-xmark"></i>
-            </button>
-        </div>
-
-        <div id="chat-messages-box" class="p-4 flex-grow overflow-y-auto space-y-2 text-xs font-medium max-h-60 no-scrollbar">
-            <div class="text-center text-[10px] text-gray-400 font-bold my-1">--- Canlı Mesajlaşma Başlatıldı 💕 ---</div>
-        </div>
-
-        <!-- Hızlı Sticker/Emoji Bar -->
-        <div class="p-2 bg-white/60 border-t border-sweetPink/30 flex justify-between gap-1">
-            <button onclick="sendSticker('🧸')" class="px-2 py-1 rounded-xl bg-white hover:bg-sweetPink/30 text-base shadow-sm">🧸</button>
-            <button onclick="sendSticker('💖')" class="px-2 py-1 rounded-xl bg-white hover:bg-sweetPink/30 text-base shadow-sm">💖</button>
-            <button onclick="sendSticker('🥺')" class="px-2 py-1 rounded-xl bg-white hover:bg-sweetPink/30 text-base shadow-sm">🥺</button>
-            <button onclick="sendSticker('👑')" class="px-2 py-1 rounded-xl bg-white hover:bg-sweetPink/30 text-base shadow-sm">👑</button>
-            <button onclick="sendSticker('💋')" class="px-2 py-1 rounded-xl bg-white hover:bg-sweetPink/30 text-base shadow-sm">💋</button>
-            <button onclick="sendSticker('🌹')" class="px-2 py-1 rounded-xl bg-white hover:bg-sweetPink/30 text-base shadow-sm">🌹</button>
-        </div>
-
-        <div class="p-3 bg-white border-t border-sweetPink/40 flex items-center gap-2">
-            <input type="text" id="popup-chat-input" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter') sendPopupMessage()" class="flex-grow px-3 py-2 rounded-xl bg-pastelBg border border-sweetPink text-xs text-softText font-bold focus:outline-none">
-            <button onclick="sendPopupMessage()" class="pink-btn px-3 py-2 rounded-xl text-white font-bold text-xs">Gönder</button>
-        </div>
-    </div>
-
-    <!-- FLOATING REACTION EMOJI DISPLAY CONTAINER -->
-    <div id="emoji-floating-container" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
-
-    <!-- JAVASCRIPT REALTIME LOGIC -->
     <script>
-        let peer = null;
-        let conn = null;
-        let isHost = false;
-        let myName = "Zeynep";
-        let partnerName = "Çağatay";
-        let roomCode = "";
-        let unreadCount = 0;
-
-        /* SAYAÇ HESAPLAMA MANTIĞI */
-        function updateCounters() {
+        // SAYAÇLAR
+        function updateTimers() {
+            const relDate = new Date('2025-10-25T00:00:00');
             const now = new Date();
-
-            // 1. SEVGİLİ OLMA SAYACI (25 Ekim 2025)
-            const loveStartDate = new Date(2025, 9, 25, 0, 0, 0); // Month is 0-indexed (9 = Oct)
-            let loveDiff = now - loveStartDate;
-
-            if (loveDiff > 0) {
-                const lDays = Math.floor(loveDiff / (1000 * 60 * 60 * 24));
-                const lHours = Math.floor((loveDiff / (1000 * 60 * 60)) % 24);
-                const lMins = Math.floor((loveDiff / 1000 / 60) % 60);
-                const lSecs = Math.floor((loveDiff / 1000) % 60);
-                document.getElementById('counter-love').innerText = `${lDays} Gün ${lHours} Sa ${lMins} Dk ${lSecs} Sn`;
+            let diff = now - relDate;
+            
+            if(diff < 0) {
+                document.getElementById('relationship-timer').innerText = "Başlangıç bekleniyor ❤️";
             } else {
-                document.getElementById('counter-love').innerText = "Yakında Başlıyor 💕";
+                let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                document.getElementById('relationship-timer').innerText = `${days} gün ${hours} saat oldu ✨`;
             }
 
-            // Geri Sayım Yardımcı Fonksiyonu
-            function getNextBirthdayCountdown(targetMonth, targetDay) {
-                let targetYear = now.getFullYear();
-                let bday = new Date(targetYear, targetMonth - 1, targetDay, 0, 0, 0);
-                if (now > bday) {
-                    bday.setFullYear(targetYear + 1);
-                }
-                let diff = bday - now;
-                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
-                const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                const m = Math.floor((diff / 1000 / 60) % 60);
-                const s = Math.floor((diff / 1000) % 60);
-                return `${d} Gün ${h} Sa ${m} Dk ${s} Sn`;
-            }
-
-            // 2. Zeynep Doğum Günü (7 Ocak)
-            document.getElementById('counter-zeynep').innerText = getNextBirthdayCountdown(1, 7);
-
-            // 3. Çağatay Doğum Günü (1 Eylül)
-            document.getElementById('counter-cagatay').innerText = getNextBirthdayCountdown(9, 1);
+            calcBirthday('zeynep-timer', 0, 7);
+            calcBirthday('cagatay-timer', 8, 1);
         }
 
-        setInterval(updateCounters, 1000);
-        updateCounters();
-
-        /* CHAT WINDOW TOGGLE */
-        function toggleChatWindow() {
-            const win = document.getElementById('chat-window');
-            win.classList.toggle('hidden');
-            if (!win.classList.contains('hidden')) {
-                unreadCount = 0;
-                document.getElementById('unread-badge').classList.add('hidden');
-            }
+        function calcBirthday(elementId, month, day) {
+            const now = new Date();
+            let year = now.getFullYear();
+            let bday = new Date(year, month, day);
+            if (now > bday) bday.setFullYear(year + 1);
+            let diff = bday - now;
+            let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            document.getElementById(elementId).innerText = `${days} gün kaldı 🎈`;
         }
+        setInterval(updateTimers, 1000);
+        updateTimers();
 
-        function appendChatMessage(sender, msg, isMe) {
-            const box = document.getElementById('chat-messages-box');
-            const msgEl = document.createElement('div');
-            msgEl.className = isMe ? 'text-right' : 'text-left';
+        // PEERJS BAĞLANTI MANTIĞI
+        let peer, conn;
+
+        function createRoom() {
+            let roomId = Math.floor(1000 + Math.random() * 9000).toString();
+            peer = new Peer('cagatay-zeynep-' + roomId);
             
-            msgEl.innerHTML = `
-                <div class="inline-block max-w-[80%] p-2.5 rounded-2xl ${isMe ? 'bg-sweetPink text-white font-bold' : 'bg-mintGreen/40 text-softText font-bold'} shadow-sm">
-                    <span class="text-[9px] opacity-75 block text-left">${sender}</span>
-                    <span>${msg}</span>
-                </div>
-            `;
-            box.appendChild(msgEl);
-            box.scrollTop = box.scrollHeight;
-
-            if (!isMe && document.getElementById('chat-window').classList.contains('hidden')) {
-                unreadCount++;
-                const badge = document.getElementById('unread-badge');
-                badge.innerText = unreadCount;
-                badge.classList.remove('hidden');
-            }
-        }
-
-        function sendPopupMessage() {
-            const input = document.getElementById('popup-chat-input');
-            const msg = input.value.trim();
-            if(!msg) return;
-
-            appendChatMessage('Sen', msg, true);
-            sendData('CHAT', { msg });
-            input.value = '';
-        }
-
-        function sendSticker(emoji) {
-            appendChatMessage('Sen', emoji, true);
-            sendData('CHAT', { msg: emoji });
-            showFloatingEmoji(emoji);
-        }
-
-        function sendData(type, payload) {
-            if (conn && conn.open) {
-                conn.send({ type, payload });
-            }
-        }
-
-        function hostCreateRoom() {
-            myName = document.getElementById('input-player-name').value || 'Zeynep';
-            partnerName = document.getElementById('input-partner-name').value || 'Çağatay';
-            roomCode = Math.random().toString(36).substring(2, 6).toUpperCase();
-            
-            document.getElementById('generated-code').innerText = roomCode;
-            document.getElementById('lobby-waiting-status').classList.remove('hidden');
-
-            peer = new Peer('LOVE-' + roomCode);
-
-            peer.on('open', () => {
-                isHost = true;
-                updateConnStatus(false, "Sevgilin Bekleniyor...");
+            peer.on('open', (id) => {
+                document.getElementById('connection-status').innerText = "Oda Kuruldu! Kod: " + roomId + " (Sevgiline söyle)";
             });
 
-            peer.on('connection', (c) => {
-                conn = c;
-                setupConnectionListeners();
+            peer.on('connection', (connection) => {
+                conn = connection;
+                setupConnection();
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-screen').classList.remove('hidden');
+                document.getElementById('room-info').innerText = "Odaya Bağlanıldı! 💖";
             });
         }
 
-        function showJoinInput() {
-            document.getElementById('join-code-box').classList.remove('hidden');
-        }
-
-        function joinExistingRoom() {
-            myName = document.getElementById('input-partner-name').value || 'Çağatay';
-            partnerName = document.getElementById('input-player-name').value || 'Zeynep';
-            roomCode = document.getElementById('input-room-code').value.trim().toUpperCase();
-
-            if(!roomCode) return alert("Lütfen oda kodunu girin!");
-
+        function joinRoom() {
+            let roomId = document.getElementById('room-input').value.trim();
+            if(roomId.length !== 4) { alert("Lütfen 4 haneli oda kodunu gir!"); return; }
+            
             peer = new Peer();
-
             peer.on('open', () => {
-                isHost = false;
-                conn = peer.connect('LOVE-' + roomCode);
-                setupConnectionListeners();
+                conn = peer.connect('cagatay-zeynep-' + roomId);
+                setupConnection();
+                document.getElementById('login-screen').classList.add('hidden');
+                document.getElementById('main-screen').classList.remove('hidden');
+                document.getElementById('room-info').innerText = "Odaya Katılındı! 💖";
             });
         }
 
-        function setupConnectionListeners() {
-            conn.on('open', () => {
-                updateConnStatus(true, "Canlı Bağlandı 💕");
-                sendData('HANDSHAKE', { name: myName });
-                
-                document.getElementById('screen-lobby').classList.add('hidden');
-                document.getElementById('screen-main').classList.remove('hidden');
-                document.getElementById('screen-main').classList.add('flex');
-                document.getElementById('room-code-display').innerText = `Oda: ${roomCode}`;
-
-                document.getElementById('auc-p1-name').innerText = myName;
-                document.getElementById('auc-p2-name').innerText = partnerName;
-
-                initGameStates();
-            });
-
+        function setupConnection() {
             conn.on('data', (data) => {
-                handleIncomingData(data);
+                if (data.type === 'chat') {
+                    appendMessage(data.msg, 'received');
+                } else if (data.type === 'game') {
+                    alert("Sevgilin bir seçim yaptı! ✨");
+                }
             });
-
-            conn.on('close', () => {
-                updateConnStatus(false, "Bağlantı Koptu");
-            });
         }
 
-        function updateConnStatus(connected, text) {
-            const pill = document.getElementById('connection-pill');
-            const txt = document.getElementById('conn-text');
-            txt.innerText = text;
-
-            if(connected) {
-                pill.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-mintGreen/30 border border-mintGreen text-emerald-700 text-xs font-bold";
-            } else {
-                pill.className = "flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-red-100 border border-red-300 text-red-500 text-xs font-bold";
-            }
+        // SEKME DEĞİŞTİRME
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
         }
 
-        function handleIncomingData(data) {
-            const { type, payload } = data;
-
-            switch(type) {
-                case 'HANDSHAKE':
-                    partnerName = payload.name;
-                    document.getElementById('auc-p2-name').innerText = partnerName;
-                    break;
-                case 'EMOJI':
-                    showFloatingEmoji(payload.emoji);
-                    break;
-                case 'CHAT':
-                    appendChatMessage(partnerName, payload.msg, false);
-                    showChatMessageNotice(partnerName + ": " + payload.msg);
-                    break;
-                case 'OMUMU_CHOICE':
-                    handleRemoteOmumuChoice(payload.choice);
-                    break;
-                case 'WHEEL_SPIN':
-                    spinWheelCanvas(payload.angle);
-                    break;
-                case 'TTT_MOVE':
-                    handleRemoteTTTMove(payload.index);
-                    break;
-                case 'PASSWORD_CLUE':
-                    document.getElementById('password-received-clue').classList.remove('hidden');
-                    document.getElementById('text-received-clue').innerText = payload.clue;
-                    break;
-            }
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value.trim();
+        // CHAT SİSTEMİ
+        function sendMessage() {
+            let input = document.getElementById('msg-input');
+            let msg = input.value.trim();
             if(!msg) return;
-
-            appendChatMessage('Sen', msg, true);
-            sendData('CHAT', { msg });
+            appendMessage(msg, 'sent');
+            conn.send({ type: 'chat', msg: msg });
             input.value = '';
         }
 
-        function showChatMessageNotice(msg) {
-            const toast = document.createElement('div');
-            toast.className = 'fixed bottom-24 left-1/2 -translate-x-1/2 bg-white border-2 border-sweetPink text-softText px-5 py-2.5 rounded-2xl text-xs font-bold shadow-xl z-50';
-            toast.innerText = msg;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+        function appendMessage(msg, type) {
+            let box = document.getElementById('chat-box');
+            let div = document.createElement('div');
+            div.className = 'message ' + type;
+            div.innerText = msg;
+            box.appendChild(div);
+            box.scrollTop = box.scrollHeight;
         }
 
-        function switchGame(gameId) {
-            document.querySelectorAll('.game-panel').forEach(p => p.classList.add('hidden'));
-            document.querySelectorAll('.game-tab').forEach(t => {
-                t.className = 'game-tab py-2.5 px-4 rounded-2xl bg-white text-softText hover:bg-sweetPink/20 text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all';
-            });
-
-            document.getElementById('game-' + gameId).classList.remove('hidden');
-            const activeTab = document.getElementById('tab-' + gameId);
-            activeTab.className = 'game-tab py-2.5 px-4 rounded-2xl pink-btn text-white text-xs font-bold whitespace-nowrap flex items-center gap-2 transition-all shadow-md';
-        }
-
-        /* O MU BU MU? */
-        const omumuQuestions = [
-            { cat: "🍿 Film & Dizi", a: "Harry Potter", b: "Yüzüklerin Efendisi", iconA: "🧙‍♂️", iconB: "🧝‍♂️" },
-            { cat: "🍕 Yemekler", a: "Pizza & İtalyan", b: "Sushi & Asya", iconA: "🍕", iconB: "🍣" },
-            { cat: "🍫 Abur Cubur", a: "Sütlü Çikolata", b: "Tuzlu Cips", iconA: "🍫", iconB: "🥔" },
-            { cat: "🎬 Çizgi Film", a: "Tom ve Jerry", b: "SüngerBob", iconA: "🐱", iconB: "🧽" }
+        // OYUN SORULARI
+        const questions = [
+            { q: "İlk kim aşık oldu?", opt1: "Ben 😎", opt2: "O 🥰" },
+            { q: "Kim daha çok uyur?", opt1: "Ben 😴", opt2: "O 🐨" },
+            { q: "Film izlerken kim daha çabuk uyuyakalır?", opt1: "Ben 🎬", opt2: "O 🍿" }
         ];
-        let omumuIdx = 0;
-        let myOmumuChoice = null, partnerOmumuChoice = null;
+        let currentQ = 0;
 
-        function loadOmumuQuestion() {
-            const q = omumuQuestions[omumuIdx];
-            document.getElementById('omumu-category').innerText = q.cat;
-            document.getElementById('text-omumu-a').innerText = q.a;
-            document.getElementById('text-omumu-b').innerText = q.b;
-            document.getElementById('icon-omumu-a').innerText = q.iconA;
-            document.getElementById('icon-omumu-b').innerText = q.iconB;
-            
-            document.getElementById('omumu-match-result').classList.add('hidden');
-            myOmumuChoice = null; partnerOmumuChoice = null;
+        function loadQuestion() {
+            if(currentQ >= questions.length) currentQ = 0;
+            let q = questions[currentQ];
+            document.getElementById('question-text').innerText = q.q;
+            document.getElementById('opt1').innerText = q.opt1;
+            document.getElementById('opt2').innerText = q.opt2;
         }
 
-        function sendOmumuChoice(choice) {
-            myOmumuChoice = choice;
-            document.getElementById('omumu-p1-status').innerText = `${myName}: Seçti ✔️`;
-            sendData('OMUMU_CHOICE', { choice });
-            checkOmumuMatch();
+        function makeChoice(choiceIdx) {
+            conn.send({ type: 'game', choice: choiceIdx });
+            currentQ++;
+            loadQuestion();
         }
 
-        function handleRemoteOmumuChoice(choice) {
-            partnerOmumuChoice = choice;
-            document.getElementById('omumu-p2-status').innerText = `${partnerName}: Seçti ✔️`;
-            checkOmumuMatch();
-        }
-
-        function checkOmumuMatch() {
-            if(myOmumuChoice && partnerOmumuChoice) {
-                const resBox = document.getElementById('omumu-match-result');
-                const resTxt = document.getElementById('omumu-match-text');
-                resBox.classList.remove('hidden');
-
-                if(myOmumuChoice === partnerOmumuChoice) {
-                    resTxt.innerText = "💖 %100 UYUM! Zeynep ve Çağatay Aynı Şeyi Seçti!";
-                    confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
-                } else {
-                    resTxt.innerText = "😅 Zıt Kutuplar Birbirini Çeker!";
-                }
-
-                setTimeout(() => {
-                    omumuIdx = (omumuIdx + 1) % omumuQuestions.length;
-                    loadOmumuQuestion();
-                }, 3500);
-            }
-        }
-
-        /* TAROT / FALI */
-        const tarotCards = [
-            { title: "Romantik Sürpriz ✨", desc: "Bu hafta sonu sevgilinizden tatlı ve beklenmedik sevimli bir jest geliyor!", icon: "🎁" },
-            { title: "Sonsuz Sarılma Kartı 🫂", desc: "Aranızdaki bağ bugün tavan yapıyor! Birbirinize bolca sarılma vakti.", icon: "💗" },
-            { title: "Ortak Tutku & Eğlence 🍿", desc: "Birlikte yeni bir film/dizi izleme veya lezzetli bir tatlı kaçamağı günü!", icon: "🍰" }
-        ];
-
-        function drawTarotCard(num) {
-            const card = tarotCards[num - 1];
-            document.getElementById('tarot-result-box').classList.remove('hidden');
-            document.getElementById('tarot-icon').innerText = card.icon;
-            document.getElementById('tarot-title').innerText = card.title;
-            document.getElementById('tarot-desc').innerText = card.desc;
-            confetti({ particleCount: 50, spread: 60 });
-        }
-
-        /* MEMORY GAME */
-        const memoryIcons = ['🧸', '💖', '🌸', '🎁', '🍰', '🍿', '🧸', '💖', '🌸', '🎁', '🍰', '🍿'];
-        let flippedCards = [];
-        let matchedCount = 0;
-
-        function initMemoryGame() {
-            const grid = document.getElementById('memory-grid');
-            grid.innerHTML = '';
-            memoryIcons.sort(() => 0.5 - Math.random());
-
-            memoryIcons.forEach((icon, i) => {
-                const btn = document.createElement('button');
-                btn.className = 'h-16 bg-white border-2 border-sweetPink rounded-2xl text-2xl flex items-center justify-center shadow-sm';
-                btn.innerText = '❓';
-                btn.onclick = () => flipMemoryCard(btn, icon);
-                grid.appendChild(btn);
-            });
-        }
-
-        function flipMemoryCard(btn, icon) {
-            if(flippedCards.length < 2 && btn.innerText === '❓') {
-                btn.innerText = icon;
-                flippedCards.push({ btn, icon });
-
-                if(flippedCards.length === 2) {
-                    if(flippedCards[0].icon === flippedCards[1].icon) {
-                        matchedCount++;
-                        document.getElementById('memory-score').innerText = `${matchedCount} / 6`;
-                        flippedCards = [];
-                    } else {
-                        setTimeout(() => {
-                            flippedCards[0].btn.innerText = '❓';
-                            flippedCards[1].btn.innerText = '❓';
-                            flippedCards = [];
-                        }, 1000);
-                    }
-                }
-            }
-        }
-
-        function resetMemoryGame() {
-            matchedCount = 0;
-            document.getElementById('memory-score').innerText = '0 / 6';
-            initMemoryGame();
-        }
-
-        /* PASSWORD / KELİME TAHMİN */
-        function sendPasswordClue() {
-            const clue = document.getElementById('input-password-clue').value.trim();
-            if(!clue) return;
-            sendData('PASSWORD_CLUE', { clue });
-            alert("İpucu gönderildi!");
-        }
-
-        /* WHEEL CANVAS */
-        function drawWheel() {
-            const canvas = document.getElementById('canvas-wheel');
-            const ctx = canvas.getContext('2d');
-            const options = ["Öpücük 😘", "15 Dk Masaj 💆‍♂️", "Kahve Ismarla ☕", "Film Seçimi 🎬", "Sinema Bileti 🍿", "Sonsuz Sarılma 🫂"];
-            const colors = ["#FFB6C1", "#A8E6CF", "#FFE4E1", "#FF69B4", "#A8E6CF", "#FFF0F5"];
-            
-            let angle = 0;
-            const slice = (Math.PI * 2) / options.length;
-
-            options.forEach((opt, i) => {
-                ctx.beginPath();
-                ctx.fillStyle = colors[i];
-                ctx.moveTo(130, 130);
-                ctx.arc(130, 130, 130, angle, angle + slice);
-                ctx.fill();
-
-                ctx.save();
-                ctx.translate(130, 130);
-                ctx.rotate(angle + slice / 2);
-                ctx.fillStyle = "#5A4A4E";
-                ctx.font = "bold 11px Quicksand";
-                ctx.fillText(opt, 45, 4);
-                ctx.restore();
-
-                angle += slice;
-            });
-        }
-
-        function triggerWheelSpin() {
-            const randomAngle = Math.floor(Math.random() * 360) + 1440;
-            spinWheelCanvas(randomAngle);
-            sendData('WHEEL_SPIN', { angle: randomAngle });
-        }
-
-        function spinWheelCanvas(targetAngle) {
-            const canvas = document.getElementById('canvas-wheel');
-            canvas.style.transition = "transform 4s cubic-bezier(0.15, 0.99, 0.35, 1)";
-            canvas.style.transform = `rotate(${targetAngle}deg)`;
-        }
-
-        /* TIC-TAC-TOE */
-        let tttBoard = Array(9).fill(null);
-
-        function sendTTTMove(idx) {
-            if(tttBoard[idx]) return;
-            tttBoard[idx] = '💖';
-            renderTTTBoard();
-            sendData('TTT_MOVE', { index: idx });
-        }
-
-        function handleRemoteTTTMove(idx) {
-            tttBoard[idx] = '💚';
-            renderTTTBoard();
-        }
-
-        function renderTTTBoard() {
-            const btns = document.querySelectorAll('.ttt-b');
-            btns.forEach((b, i) => {
-                b.innerText = tttBoard[i] || '';
-            });
-        }
-
-        function resetTTTGame() {
-            tttBoard = Array(9).fill(null);
-            renderTTTBoard();
-        }
-
-        function initGameStates() {
-            loadOmumuQuestion();
-            drawWheel();
-            initMemoryGame();
-        }
+        loadQuestion();
     </script>
 </body>
 </html>
-```
-
-Güle güle kullanın, iyi oyunlar! 🧸💕
