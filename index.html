@@ -35,7 +35,7 @@
         .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
         
         /* Chat */
-        .chat-box { height: 220px; border: 1px solid #ddd; border-radius: 10px; overflow-y: scroll; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: #fafafa; }
+        .chat-box { height: 180px; border: 1px solid #ddd; border-radius: 10px; overflow-y: scroll; padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px; background: #fafafa; }
         .message { padding: 8px 12px; border-radius: 10px; max-width: 80%; font-size: 14px; word-break: break-word; }
         .message.sent { background: #ffccd5; align-self: flex-end; color: #333; }
         .message.received { background: #e2e2e2; align-self: flex-start; color: #333; }
@@ -43,11 +43,15 @@
         .chat-input-area input { margin-top: 0; text-align: left; }
         .chat-input-area .btn { margin-top: 0; width: 80px; }
 
-        /* Oyun Alanı */
+        /* O mu Bu mu ve Kelime Oyunu Alanları */
         .game-area { text-align: center; padding: 10px 0; }
         .options-container { display: flex; gap: 10px; margin-top: 15px; }
         .option-btn { flex: 1; padding: 20px 10px; background: #f0f0f0; border: 2px solid #ddd; border-radius: 12px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .option-btn:hover { background: #ffe0e6; border-color: var(--primary); }
+        
+        .cat-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; }
+        .cat-btn { flex: 1; min-width: 45%; padding: 10px; background: #eee; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .cat-btn.active { background: var(--primary); color: white; }
     </style>
 </head>
 <body>
@@ -84,7 +88,8 @@
         
         <div class="menu-grid">
             <button class="btn" onclick="switchTab('chat')">Canlı Chat 💬</button>
-            <button class="btn btn-secondary" onclick="switchTab('game')">Soru Oyunu 🎯</button>
+            <button class="btn btn-secondary" onclick="switchTab('omubumu')">O mu Bu mu? 🎯</button>
+            <button class="btn" style="background:#28a745;" onclick="switchTab('kelime')">Kelime Türet ✍️</button>
         </div>
 
         <!-- CHAT SEKMESİ -->
@@ -96,15 +101,32 @@
             </div>
         </div>
 
-        <!-- OYUN SEKMESİ -->
-        <div id="tab-game" class="tab-content hidden" style="margin-top: 15px;">
-            <h3 id="question-title">Birimiz Seçiyoruz!</h3>
+        <!-- O MU BU MU SEKMESİ -->
+        <div id="tab-omubumu" class="tab-content hidden" style="margin-top: 15px;">
+            <h3>O mu Bu mu? (Kategorili)</h3>
+            <div class="cat-buttons">
+                <button class="cat-btn active" onclick="setCategory('yemek')">🍔 Yemek</button>
+                <button class="cat-btn" onclick="setCategory('film')">🎬 Film</button>
+                <button class="cat-btn" onclick="setCategory('dizi')">📺 Dizi</button>
+                <button class="cat-btn" onclick="setCategory('sarki')">🎵 Şarkı</button>
+            </div>
             <div class="game-area">
-                <p id="question-text" style="font-weight: bold; margin-bottom: 10px;"></p>
+                <p id="omubumu-status" style="font-weight:bold; color:var(--secondary); margin-bottom:10px;"></p>
                 <div class="options-container">
-                    <button class="option-btn" id="opt1" onclick="makeChoice(0)">Seçenek 1</button>
-                    <button class="option-btn" id="opt2" onclick="makeChoice(1)">Seçenek 2</button>
+                    <button class="option-btn" id="opt1" onclick="chooseOption(0)">Seçenek 1</button>
+                    <button class="option-btn" id="opt2" onclick="chooseOption(1)">Seçenek 2</button>
                 </div>
+            </div>
+        </div>
+
+        <!-- KELİME TÜRETME SEKMESİ -->
+        <div id="tab-kelime" class="tab-content hidden" style="margin-top: 15px;">
+            <h3>Son Heceden Kelime Türet</h3>
+            <div class="game-area">
+                <p id="kelime-info" style="font-size: 14px; margin-bottom: 10px; color:#555;">Mevcut Kelime:</p>
+                <h2 id="current-word" style="color: var(--secondary); background:#f0f0f5; padding:10px; border-radius:8px;">Henüz kelime yok</h2>
+                <input type="text" id="word-input" placeholder="Son heceyle başlayan kelime yaz...">
+                <button class="btn" onclick="sendWord()">Kelimeyi Gönder</button>
             </div>
         </div>
     </div>
@@ -112,6 +134,7 @@
     <script>
         // SAYAÇLAR
         function updateTimers() {
+            // Sevgililik Başlangıcı: 25/10/2025
             const relDate = new Date('2025-10-25T00:00:00');
             const now = new Date();
             let diff = now - relDate;
@@ -124,6 +147,7 @@
                 document.getElementById('relationship-timer').innerText = `${days} gün ${hours} saat oldu ✨`;
             }
 
+            // Doğum Günü Hesaplama (Zeynep: 7 Ocak, Çağatay: 1 Eylül)
             calcBirthday('zeynep-timer', 0, 7);
             calcBirthday('cagatay-timer', 8, 1);
         }
@@ -142,12 +166,14 @@
 
         // PEERJS BAĞLANTI MANTIĞI
         let peer, conn;
+        let isHost = false;
 
         function createRoom() {
             let roomId = Math.floor(1000 + Math.random() * 9000).toString();
             peer = new Peer('cagatay-zeynep-' + roomId);
             
             peer.on('open', (id) => {
+                isHost = true;
                 document.getElementById('connection-status').innerText = "Oda Kuruldu! Kod: " + roomId + " (Sevgiline söyle)";
             });
 
@@ -178,8 +204,10 @@
             conn.on('data', (data) => {
                 if (data.type === 'chat') {
                     appendMessage(data.msg, 'received');
-                } else if (data.type === 'game') {
-                    alert("Sevgilin bir seçim yaptı! ✨");
+                } else if (data.type === 'omubumu') {
+                    handleRemoteChoice(data.choice, data.category);
+                } else if (data.type === 'kelime') {
+                    updateWordGame(data.word, data.sender);
                 }
             });
         }
@@ -209,29 +237,83 @@
             box.scrollTop = box.scrollHeight;
         }
 
-        // OYUN SORULARI
-        const questions = [
-            { q: "İlk kim aşık oldu?", opt1: "Ben 😎", opt2: "O 🥰" },
-            { q: "Kim daha çok uyur?", opt1: "Ben 😴", opt2: "O 🐨" },
-            { q: "Film izlerken kim daha çabuk uyuyakalır?", opt1: "Ben 🎬", opt2: "O 🍿" }
-        ];
-        let currentQ = 0;
+        // O MU BU MU SİSTEMİ
+        const categories = {
+            yemek: ["Mantı 🥟", "Pizza 🍕", "Lahmacun lah", "Burger 🍔", "İskender 🥩", "Sushi 🍣"],
+            film: ["Korku Filmi 👻", "Komedi 🤣", "Romantik 💕", "Bilim Kurgu 🚀", "Aksiyon 🎬", "Animasyon 🐾"],
+            dizi: ["Yerli Dizi 📺", "Yabancı Dizi 🌍", "Anime 🌸", "Belgesel 🦁"],
+            sarki: ["Pop 🎤", "Rock 🎸", "Rap 🎧", "Akustik 🎻", "Arabesk 🖤", "Couch 🎷"]
+        };
+        let currentCat = 'yemek';
+        let catIndex = 0;
+        let myChoices = {};
+        let partnerChoices = {};
 
-        function loadQuestion() {
-            if(currentQ >= questions.length) currentQ = 0;
-            let q = questions[currentQ];
-            document.getElementById('question-text').innerText = q.q;
-            document.getElementById('opt1').innerText = q.opt1;
-            document.getElementById('opt2').innerText = q.opt2;
+        function setCategory(cat) {
+            currentCat = cat;
+            catIndex = 0;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            loadOmubumuQuestion();
         }
 
-        function makeChoice(choiceIdx) {
-            conn.send({ type: 'game', choice: choiceIdx });
-            currentQ++;
-            loadQuestion();
+        function loadOmubumuQuestion() {
+            let list = categories[currentCat];
+            if (catIndex >= list.length - 1) {
+                document.getElementById('omubumu-status').innerText = "Bu kategorideki tüm seçimler bitti! ✨";
+                document.getElementById('opt1').innerText = "-";
+                document.getElementById('opt2').innerText = "-";
+                return;
+            }
+            document.getElementById('opt1').innerText = list[catIndex];
+            document.getElementById('opt2').innerText = list[catIndex + 1];
+            document.getElementById('omubumu-status').innerText = `Soru ${Math.floor(catIndex/2) + 1} / Seçimini yap!`;
         }
 
-        loadQuestion();
+        function chooseOption(choiceIdx) {
+            let list = categories[currentCat];
+            let chosenText = (choiceIdx === 0) ? list[catIndex] : list[catIndex + 1];
+            
+            // Seçimi gönder
+            conn.send({ type: 'omubumu', category: currentCat, choice: chosenText });
+            
+            catIndex += 2;
+            loadOmubumuQuestion();
+        }
+
+        function handleRemoteChoice(choice, cat) {
+            // Karşı tarafın seçimi geldiğinde yapılacak işlemler buraya eklenebilir
+        }
+
+        // İlk kategoriyi başlat
+        setTimeout(loadOmubumuQuestion, 500);
+
+        // KELİME TÜRETME SİSTEMİ
+        let activeWord = "";
+
+        function sendWord() {
+            let input = document.getElementById('word-input');
+            let word = input.value.trim().toLowerCase();
+            if(!word) return;
+
+            if(activeWord && activeWord.length > 0) {
+                let lastTwo = activeWord.slice(-2);
+                if(!word.startsWith(lastTwo)) {
+                    alert(`Kelime "${lastTwo}" hecesiyle başlamalı!`);
+                    return;
+                }
+            }
+
+            activeWord = word;
+            document.getElementById('current-word').innerText = word.toUpperCase();
+            conn.send({ type: 'kelime', word: word, sender: 'Sevgilin' });
+            input.value = '';
+        }
+
+        function updateWordGame(word, sender) {
+            activeWord = word;
+            document.getElementById('current-word').innerText = word.toUpperCase();
+        }
     </script>
 </body>
 </html>
